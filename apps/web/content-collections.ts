@@ -2,7 +2,9 @@ import { defineCollection, defineConfig } from '@content-collections/core'
 import { compileMDX } from '@content-collections/mdx'
 import rehypePrettyCode from 'rehype-pretty-code'
 import { z } from 'zod'
-import { NOTE_STATUSES, PROJECT_STATUSES } from '@pbeta/content'
+
+const NOTE_STATUSES = ['architecture', 'development', 'research', 'snippet'] as const
+const PROJECT_STATUSES = ['active', 'stable', 'archive'] as const
 
 const mdxOptions = {
   rehypePlugins: [[rehypePrettyCode, { theme: 'github-dark' }]] as never,
@@ -64,4 +66,3 @@ const research = defineCollection({
 export default defineConfig({
   content: [notes, projects, research],
 })
-

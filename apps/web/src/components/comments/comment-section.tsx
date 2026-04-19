@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { CommentForm } from './comment-form'
 import { CommentItem } from './comment-item'
+import { API_BASE_URL } from '@/lib/api-base-url'
 
 interface CommentSectionProps {
   slug: string
@@ -14,7 +15,7 @@ export function CommentSection({ slug }: CommentSectionProps) {
 
   const fetchComments = useCallback(async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/comments?slug=${encodeURIComponent(slug)}`)
+      const res = await fetch(`${API_BASE_URL}/api/v1/comments?slug=${encodeURIComponent(slug)}`)
       if (res.ok) {
         const data = await res.json()
         setComments(data)

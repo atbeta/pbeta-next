@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/components/auth-context'
 import { Logo } from '@/components/logo'
+import { API_BASE_URL } from '@/lib/api-base-url'
 import type { CommentEntry, ServiceEntry } from '@pbeta/shared'
 
 const DEFAULT_LINKS = [
@@ -91,7 +92,7 @@ export default function PrivatePage() {
   const fetchAllComments = useCallback(async () => {
     if (!token) return
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/comments?all=true`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/comments?all=true`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (res.ok) setComments(await res.json())
@@ -102,7 +103,7 @@ export default function PrivatePage() {
 
   const fetchServiceStats = useCallback(async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/services`)
+      const res = await fetch(`${API_BASE_URL}/api/v1/services`)
       if (res.ok) {
         const services: ServiceEntry[] = await res.json()
         setServiceStats({ up: services.filter(s => s.status === 'up').length, total: services.length })
@@ -114,7 +115,7 @@ export default function PrivatePage() {
     if (!confirm('确定要删除这条评论吗？')) return
     setIsDeleting(id)
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/comments/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/comments/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       })

@@ -12,7 +12,7 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY . .
 # Prune the workspace for the web app
-RUN turbo prune --scope=@pbeta/web --docker
+RUN turbo prune @pbeta/web --docker
 
 # Add lockfile and package.json's of isolated subworkspace
 FROM base AS installer
@@ -23,7 +23,7 @@ WORKDIR /app
 COPY .gitignore .gitignore
 COPY --from=builder /app/out/json/ .
 COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-RUN corepack enable
+RUN npm install -g pnpm@10.30.3
 RUN pnpm install --frozen-lockfile
 
 # Build the project

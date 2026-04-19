@@ -59,7 +59,7 @@ export default function ProjectsPage() {
                 {/* Footer */}
                 <div className="flex items-center justify-between pt-1">
                   <div className="flex flex-wrap gap-1">
-                    {project.tags.slice(0, 3).map((tag) => <Tag key={tag}>{tag}</Tag>)}
+                    {project.tags.slice(0, 3).map((tag: string) => <Tag key={tag}>{tag}</Tag>)}
                   </div>
                   <span className="font-mono text-[10px] text-[var(--muted-foreground)] tabular-nums shrink-0 ml-2">
                     {formatDate(project.date)}

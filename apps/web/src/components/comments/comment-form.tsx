@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { API_BASE_URL } from '@/lib/api-base-url'
 
 interface CommentFormProps {
   slug: string
@@ -26,7 +27,7 @@ export function CommentForm({ slug, parentId, onSuccess, onCancel, isReply }: Co
     setError('')
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/comments`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

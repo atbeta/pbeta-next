@@ -93,7 +93,7 @@ export default async function ProjectPage({ params }: Props) {
 
         {project.tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {project.tags.map((tag) => <Tag key={tag}>{tag}</Tag>)}
+            {project.tags.map((tag: string) => <Tag key={tag}>{tag}</Tag>)}
           </div>
         )}
       </div>

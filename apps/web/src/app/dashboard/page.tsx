@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/auth-context'
 import { useRouter } from 'next/navigation'
+import { API_BASE_URL } from '@/lib/api-base-url'
 import type { ServiceEntry, FeedbackEntry, CommentEntry } from '@pbeta/shared'
 
 export default function DashboardPage() {
@@ -32,16 +33,14 @@ export default function DashboardPage() {
   const fetchData = async () => {
     setIsLoading(true)
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-      
       // Fetch services
-      const servicesRes = await fetch(`${apiUrl}/api/v1/services`)
+      const servicesRes = await fetch(`${API_BASE_URL}/api/v1/services`)
       if (servicesRes.ok) {
         setServices(await servicesRes.json())
       }
 
       // Fetch feedback (private)
-      const feedbackRes = await fetch(`${apiUrl}/api/v1/feedback`, {
+      const feedbackRes = await fetch(`${API_BASE_URL}/api/v1/feedback`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (feedbackRes.ok) {
@@ -49,7 +48,7 @@ export default function DashboardPage() {
       }
 
       // Fetch comments (private admin)
-      const commentsRes = await fetch(`${apiUrl}/api/v1/comments?all=true`, {
+      const commentsRes = await fetch(`${API_BASE_URL}/api/v1/comments?all=true`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (commentsRes.ok) {
@@ -66,8 +65,7 @@ export default function DashboardPage() {
     if (!confirm('确定要删除这个服务吗？')) return
     
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-      const res = await fetch(`${apiUrl}/api/v1/services/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/services/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -84,8 +82,7 @@ export default function DashboardPage() {
     if (!confirm('确定要删除这条评论吗？')) return
     
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-      const res = await fetch(`${apiUrl}/api/v1/comments/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/comments/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -101,10 +98,9 @@ export default function DashboardPage() {
   const handleSaveService = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
       const url = editingId 
-        ? `${apiUrl}/api/v1/services/${editingId}`
-        : `${apiUrl}/api/v1/services`
+        ? `${API_BASE_URL}/api/v1/services/${editingId}`
+        : `${API_BASE_URL}/api/v1/services`
       
       const method = editingId ? 'PUT' : 'POST'
       

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { API_BASE_URL } from '@/lib/api-base-url'
 
 interface AuthContextType {
   token: string | null
@@ -30,8 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (apiKey: string) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-      const res = await fetch(`${apiUrl}/api/v1/auth/login`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ apiKey }),

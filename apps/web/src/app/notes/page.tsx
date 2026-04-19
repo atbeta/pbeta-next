@@ -59,7 +59,7 @@ export default function NotesPage() {
                 </p>
                 {note.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 pt-1.5">
-                    {note.tags.map((tag) => <Tag key={tag}>{tag}</Tag>)}
+                    {note.tags.map((tag: string) => <Tag key={tag}>{tag}</Tag>)}
                   </div>
                 )}
               </div>

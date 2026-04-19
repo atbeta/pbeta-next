@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import type { ServiceEntry } from '@pbeta/shared'
+import { API_BASE_URL } from '@/lib/api-base-url'
 
 export const metadata: Metadata = { title: '服务' }
 
@@ -17,8 +18,7 @@ const statusConfig = {
 
 async function getServices(): Promise<ServicesResult> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-    const res = await fetch(`${apiUrl}/api/v1/services`, {
+    const res = await fetch(`${API_BASE_URL}/api/v1/services`, {
       next: { revalidate: 60 }, // Revalidate every 60 seconds
     })
 

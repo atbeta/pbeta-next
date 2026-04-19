@@ -56,7 +56,7 @@ export default async function ResearchDetailPage({ params }: Props) {
             <>
               <span className="text-[var(--border-strong)]">·</span>
               <div className="flex flex-wrap gap-1">
-                {item.tags.map((tag) => <Tag key={tag}>{tag}</Tag>)}
+                {item.tags.map((tag: string) => <Tag key={tag}>{tag}</Tag>)}
               </div>
             </>
           )}

@@ -61,7 +61,7 @@ export default async function NotePage({ params }: Props) {
           </span>
           {note.tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
-              {note.tags.map((tag) => <Tag key={tag}>{tag}</Tag>)}
+              {note.tags.map((tag: string) => <Tag key={tag}>{tag}</Tag>)}
             </div>
           )}
         </div>

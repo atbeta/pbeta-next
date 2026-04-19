@@ -46,7 +46,7 @@ export default function ResearchPage() {
 
                 {item.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1">
-                    {item.tags.map((tag) => <Tag key={tag}>{tag}</Tag>)}
+                    {item.tags.map((tag: string) => <Tag key={tag}>{tag}</Tag>)}
                   </div>
                 )}
               </Link>
