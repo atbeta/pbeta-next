@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(pnpm --version)",
+      "Bash(npx --version)",
+      "Bash(pnpm-workspace.yaml:*)",
+      "Bash(pnpm create:*)",
+      "Bash(pnpm dlx:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(pnpm --filter @nestjs/core... run build)",
+      "Bash(pnpm --filter @pbeta/web run type-check)",
+      "Bash(pnpm --filter @pbeta/api run build)",
+      "Bash(pnpm --filter @pbeta/api add @nestjs/config @nestjs/jwt @nestjs/throttler @nestjs/schedule @nestjs/terminus @nestjs/bullmq bullmq @prisma/client zod)",
+      "Bash(pnpm --filter @pbeta/api add -D prisma)",
+      "Bash(npx prisma:*)",
+      "Bash(pnpm --filter @pbeta/api add -D dotenv)",
+      "Bash(docker compose:*)",
+      "Bash(pnpm test:*)"
+    ]
+  }
+}

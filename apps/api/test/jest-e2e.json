@@ -1,0 +1,20 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": "../",
+  "testRegex": "test/.*\\.e2e-spec\\.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": ["ts-jest", {
+      "tsconfig": {
+        "module": "CommonJS",
+        "moduleResolution": "node",
+        "target": "ES2022",
+        "esModuleInterop": true,
+        "resolvePackageJsonExports": false
+      },
+      "diagnostics": { "ignoreCodes": ["TS1470", "TS2821", "TS1343", "TS1471"] }
+    }]
+  },
+  "setupFiles": ["<rootDir>/test/setup-e2e.ts"],
+  "testEnvironment": "node",
+  "testTimeout": 30000
+}

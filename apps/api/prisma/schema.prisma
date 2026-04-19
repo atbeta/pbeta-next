@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Service status: tracks external services that pbeta.me maintains
+// ---------------------------------------------------------------------------
+model Service {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  url         String
+  category    String    @default("general")
+  status      String    @default("unknown") // up | down | degraded | unknown
+  checkedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  statusHistory ServiceStatusHistory[]
+  feedbacks     Feedback[]
+}
+
+model ServiceStatusHistory {
+  id         String   @id @default(cuid())
+  serviceId  String
+  status     String   // up | down | degraded
+  latencyMs  Int?
+  checkedAt  DateTime @default(now())
+
+  service    Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@index([serviceId, checkedAt(sort: Desc)])
+}
+
+// ---------------------------------------------------------------------------
+// Feedback: user-submitted feedback on services
+// ---------------------------------------------------------------------------
+model Feedback {
+  id        String   @id @default(cuid())
+  serviceId String?
+  message   String
+  contact   String?
+  createdAt DateTime @default(now())
+
+  service   Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+}
+
+// ---------------------------------------------------------------------------
+// Comment: user comments on pages (notes/projects)
+// ---------------------------------------------------------------------------
+model Comment {
+  id        String   @id @default(cuid())
+  slug      String   // path identifying the page (e.g. /notes/hello-world)
+  content   String   @db.Text
+  author    String
+  email     String?
+  isAdmin   Boolean  @default(false)
+  
+  // Anti-spam & metadata
+  ip        String?
+  userAgent String?
+  
+  // Nested replies
+  parentId  String?
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([parentId])
+}

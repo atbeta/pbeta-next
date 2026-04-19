@@ -1,0 +1,23 @@
+---
+title: "复杂网络环境下的多协议代理与劫持技术演进"
+description: "从 HTTP/1.1 到 HTTP/3 (QUIC)，探讨现代网络抓包与流量治理的核心技术与挑战。"
+date: "2026-03-16"
+tags: ["Networking", "Proxy", "Rust", "Security"]
+status: "in-progress"
+---
+
+构建 Relaycraft 和 `relay-core` 的过程中，网络代理技术的复杂性远超预期。本课题系统性地梳理现代网络代理技术的演进。
+
+## 核心研究方向
+
+### 1. HTTP/3 (QUIC) 流量的拦截与调试
+- UDP 协议代理的挑战：无连接状态下的会话管理。
+- QUIC 协议的加密握手拦截方案：如何在不破坏协议特性的前提下进行中间人（MITM）劫持。
+
+### 2. 透明代理（Transparent Proxy）架构设计
+- 基于 eBPF 与 iptables/nftables 的底层流量重定向技术对比。
+- 跨平台（Linux/macOS/Windows）的透明代理实现差异与统一抽象层设计。
+
+### 3. 高性能内存模型设计
+- 代理网关中的零拷贝（Zero-Copy）技术：如何避免数据在内核态与用户态之间的频繁复制。
+- 基于 Rust 异步运行时的连接池与内存池优化策略。

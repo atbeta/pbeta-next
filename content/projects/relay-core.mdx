@@ -1,0 +1,19 @@
+---
+title: "relay-core — 高性能代理网关"
+description: "纯 Rust 编写的高性能代理网关引擎，旨在成为 Relaycraft 未来版本的核心数据面。"
+date: "2026-03-17"
+tags: ["Rust", "Proxy", "Gateway", "High Performance"]
+projectStatus: active
+repo: "https://github.com/relaycraft/relay-core"
+---
+
+`relay-core` 是一个纯 Rust 编写的高性能代理网关引擎。虽然当前版本的 Relaycraft 使用的是开源的 mitmproxy 作为代理核心，但 `relay-core` 被设计为 Relaycraft 未来版本的强大数据处理核心。
+
+## 架构优势
+
+- **极致性能**：利用 Rust 的无栈协程与异步 I/O 达到极高的并发吞吐量。
+- **内存安全**：零数据竞争，杜绝传统 C/C++ 代理常见的内存泄漏问题。
+- **高可扩展**：模块化的过滤器与协议解析层，支持透明代理、TCP/UDP 转发及 HTTP/HTTPS 劫持。
+- **丰富的脚本支持**：集成脚本引擎以实现动态流量干预。
+
+它不仅将作为 Relaycraft 未来的底层引擎，也可独立部署为轻量级的高性能网关服务。
