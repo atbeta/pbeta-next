@@ -1,23 +1,24 @@
 ---
-title: "pbeta.me — 新一代个人网站"
-description: "从零重建的个人网站，采用 Next.js 16 + NestJS 11 全栈架构，聚焦项目展示、技术笔记、研究记录与公益服务监控。"
+title: "pbeta.me — 个人网站与内容中枢"
+description: "已正式上线的个人网站，采用 Next.js 16 + NestJS 11 全栈架构，承载项目展示、技术笔记、研究记录与服务监控。"
 date: "2026-03-16"
-tags: ["Next.js", "NestJS", "TypeScript", "Monorepo"]
+tags: ["pbeta.me", "Personal Website", "Next.js", "NestJS", "Monorepo"]
 projectStatus: active
+url: "https://pbeta.me"
 repo: "https://github.com/atbeta/pbeta-next"
 ---
 
-这是当前你正在浏览的网站。从零开始的完整重建。
+这是当前正在访问的网站。项目从零重建，目标是把个人实践、项目沉淀与长期内容创作整合到同一个可持续维护的平台中。
 
 ## 技术栈
 
 - **前端**：Next.js 16 (Turbopack) + React 19 + Tailwind CSS v4
 - **后端**：NestJS 11 + Prisma 7 + PostgreSQL 17
 - **内容**：@content-collections + MDX + rehype-pretty-code
-- **基础设施**：Vercel (前端) + Fly.io (后端) + Neon (数据库)
+- **基础设施**：Railway（Web + API + PostgreSQL + Redis）
 
 ## 设计目标
 
-放弃传统博客模式，转向「数字花园」理念 —— 内容是活的，会持续生长。
+以「数字花园」为核心表达方式，持续迭代已有内容，而不是一次性发布后沉底。
 
-服务监控模块提供实时状态可观测性，后端 API 支持公益工具接入。
+服务监控模块用于维护在线服务可观测性，后端 API 同时为后续工具化功能预留扩展空间。

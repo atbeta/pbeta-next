@@ -1,19 +1,18 @@
 ---
-title: "relay-core — 高性能代理网关"
-description: "纯 Rust 编写的高性能代理网关引擎，旨在成为 Relaycraft 未来版本的核心数据面。"
+title: "RelayCore — 高性能代理内核（开发中）"
+description: "纯 Rust 编写的代理内核项目，作为 RelayCraft 后续版本的核心能力储备，目前仍处于内部开发阶段。"
 date: "2026-03-17"
-tags: ["Rust", "Proxy", "Gateway", "High Performance"]
+tags: ["RelayCore", "Proxy Engine", "Gateway", "Rust", "Performance"]
 projectStatus: active
-repo: "https://github.com/relaycraft/relay-core"
 ---
 
-`relay-core` 是一个纯 Rust 编写的高性能代理网关引擎。虽然当前版本的 Relaycraft 使用的是开源的 mitmproxy 作为代理核心，但 `relay-core` 被设计为 Relaycraft 未来版本的强大数据处理核心。
+`RelayCore` 是一个纯 Rust 编写的代理内核项目，目标是为 `RelayCraft` 提供更可控、更高性能的底层数据处理能力。当前该项目尚未公开到 GitHub，仍在内部持续迭代。
 
 ## 架构优势
 
-- **极致性能**：利用 Rust 的无栈协程与异步 I/O 达到极高的并发吞吐量。
-- **内存安全**：零数据竞争，杜绝传统 C/C++ 代理常见的内存泄漏问题。
-- **高可扩展**：模块化的过滤器与协议解析层，支持透明代理、TCP/UDP 转发及 HTTP/HTTPS 劫持。
-- **丰富的脚本支持**：集成脚本引擎以实现动态流量干预。
+- **性能优先**：以 Rust 异步 I/O 为基础，面向高并发代理场景优化。
+- **安全与稳定**：利用 Rust 的类型系统与所有权模型降低运行时风险。
+- **模块化设计**：按协议处理、过滤器与流量管线拆分，便于后续扩展。
+- **面向 RelayCraft 集成**：作为长期演进方向，为上层产品沉淀核心能力。
 
-它不仅将作为 Relaycraft 未来的底层引擎，也可独立部署为轻量级的高性能网关服务。
+当前页面用于记录项目定位与阶段进展，公开仓库与独立发布计划将在后续版本中补充。
