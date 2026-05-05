@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import { allTerms } from 'content-collections'
 import { MDXContent } from '@/components/mdx-content'
 import { CDVisualization } from '@/components/terms/cd-visualization'
+import { OverlayVisualization } from '@/components/terms/overlay-visualization'
+import { DefectGallery } from '@/components/terms/defect-gallery'
 
 export async function generateStaticParams() {
   return allTerms.map((t) => ({ slug: t._meta.path }))
@@ -67,6 +69,16 @@ export default async function TermDetailPage({
       {term.visualization === 'cd-measurement' && (
         <div className="mb-10 anim-fade-up delay-1">
           <CDVisualization />
+        </div>
+      )}
+      {term.visualization === 'overlay-sim' && (
+        <div className="mb-10 anim-fade-up delay-1">
+          <OverlayVisualization />
+        </div>
+      )}
+      {term.visualization === 'defect-gallery' && (
+        <div className="mb-10 anim-fade-up delay-1">
+          <DefectGallery />
         </div>
       )}
 
