@@ -202,13 +202,12 @@ export function CDVisualization() {
     }
 
     const structY = margin.top + ph + 10
-    ctx.fillStyle = ctx.createLinearGradient(margin.left, structY, margin.left + pw, structY)
-    const gradEnd = W - margin.right
-    const grad = ctx.createLinearGradient(margin.left, 0, gradEnd, 0)
+    const grad = ctx.createLinearGradient(margin.left, 0, W - margin.right, 0)
+    const clamp = (v: number) => Math.max(0, Math.min(1, v / 200))
     grad.addColorStop(0, 'rgba(59,130,246,0.15)')
-    grad.addColorStop(leftCross / 200, 'rgba(59,130,246,0.3)')
-    grad.addColorStop((leftCross + measuredCD / 2) / 200, 'rgba(59,130,246,0.5)')
-    grad.addColorStop(rightCross / 200, 'rgba(59,130,246,0.3)')
+    grad.addColorStop(clamp(leftCross), 'rgba(59,130,246,0.3)')
+    grad.addColorStop(clamp(leftCross + measuredCD / 2), 'rgba(59,130,246,0.5)')
+    grad.addColorStop(clamp(rightCross), 'rgba(59,130,246,0.3)')
     grad.addColorStop(1, 'rgba(59,130,246,0.15)')
     ctx.fillStyle = grad
     ctx.fillRect(margin.left, structY, pw, 20)
