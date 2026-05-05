@@ -5,6 +5,8 @@ import { z } from 'zod'
 
 const NOTE_STATUSES = ['architecture', 'development', 'research', 'snippet'] as const
 const PROJECT_STATUSES = ['active', 'stable', 'archive'] as const
+const TERM_CATEGORIES = ['metrology', 'lithography', 'transistor', 'etching', 'deposition', 'cmp', 'wafer', 'packaging'] as const
+const TERM_DIFFICULTIES = ['beginner', 'intermediate', 'advanced'] as const
 
 const mdxOptions = {
   rehypePlugins: [[rehypePrettyCode, { theme: 'github-dark' }]] as never,
@@ -63,6 +65,24 @@ const research = defineCollection({
   },
 })
 
+const terms = defineCollection({
+  name: 'terms',
+  directory: '../../content/terms',
+  include: '**/*.mdx',
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    category: z.enum(TERM_CATEGORIES),
+    tags: z.array(z.string()).default([]),
+    difficulty: z.enum(TERM_DIFFICULTIES).default('intermediate'),
+    visualization: z.string().optional(),
+  }),
+  transform: async (doc, ctx) => {
+    const mdx = await compileMDX(ctx, doc, mdxOptions)
+    return { ...doc, mdx }
+  },
+})
+
 export default defineConfig({
-  content: [notes, projects, research],
+  content: [notes, projects, research, terms],
 })

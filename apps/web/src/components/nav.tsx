@@ -11,6 +11,7 @@ const links = [
   { href: '/notes', label: '随笔' },
   { href: '/research', label: '研究' },
   { href: '/services', label: '服务' },
+  { href: '/terms', label: '术语' },
   { href: '/playground', label: 'Playground' },
 ]
 

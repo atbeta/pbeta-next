@@ -1,0 +1,66 @@
+---
+title: "CD — Critical Dimension"
+description: "关键尺寸（CD）是半导体制造中最基础的量测概念，指晶圆上特定特征的最小线宽或间距。CD 的精确控制直接影响芯片性能与良率。"
+category: "metrology"
+tags: ["CD-SEM", "关键尺寸", "量检测", "线宽", "OCD"]
+difficulty: "beginner"
+visualization: "cd-measurement"
+---
+
+## 什么是 CD？
+
+**Critical Dimension（关键尺寸）** 是半导体制造中需要精确控制的特征尺寸。通常指：
+
+- **线宽（Line Width）**：光刻胶或刻蚀后线条的宽度
+- **间距（Space）**：两条相邻线条之间的距离
+- **接触孔直径（Contact Hole CD）**：通孔的直径
+- **栅极长度（Gate Length）**：晶体管栅极的关键尺寸
+
+随着制程节点从 28nm → 14nm → 7nm → 3nm，CD 的控制精度要求已达到亚纳米级别。
+
+## CD 的测量方法
+
+### CD-SEM（扫描电子显微镜）
+
+- 利用电子束扫描样品表面
+- 通过二次电子信号成像
+- 边缘检测算法确定线宽
+- 精度可达 0.1nm 级别
+
+### OCD（光学临界尺寸测量）
+
+- 基于散射测量（Scatterometry）
+- 测量周期性结构的衍射光谱
+- 通过模型拟合提取 CD 值
+- 非破坏性、速度快
+
+## CD 与工艺窗口
+
+CD 受曝光剂量（Dose）和焦距（Focus）的共同影响：
+
+- **剂量增加** → CD 减小（正性光刻胶）
+- **离焦** → CD 不均匀，图案失真
+- **工艺窗口** = 满足 CD 规格的 Dose-Focus 区域
+
+工艺窗口越大，量产越稳定。
+
+## CD Uniformity（CDU）
+
+CDU 衡量晶圆上不同位置的 CD 一致性：
+
+- **Within-Wafer**：同一晶圆内的 CD 变化
+- **Wafer-to-Wafer**：不同晶圆间的 CD 变化
+- **Lot-to-Lot**：不同批次间的 CD 变化
+
+CDU 是良率的关键指标。3σ 值通常要求控制在 CD 目标的 5-10% 以内。
+
+## 实际应用
+
+在量检测设备中，CD 测量是**最频繁的测量项目**：
+
+1. 光刻后测量（ADI — After Develop Inspection）
+2. 刻蚀后测量（AEI — After Etch Inspection）
+3. CMP 后测量（平坦化后检查）
+4. 在线监控（In-line Monitoring）
+
+典型规格：目标 CD ± 10%，CDU < 3nm (3σ)。
