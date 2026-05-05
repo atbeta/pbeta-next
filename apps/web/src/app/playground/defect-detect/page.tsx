@@ -16,7 +16,7 @@ export default function DefectDetectPage() {
         <h1 className="text-xl font-bold tracking-tight mb-2">Wafer Defect Detection</h1>
         <p className="text-sm text-[var(--muted-foreground)] max-w-lg leading-relaxed">
           模拟晶圆表面缺陷检测流水线。左侧为处理流程可视化，右侧可调整检测参数。
-          展示从原始图像到缺陷标记的完整信号处理链路。
+          支持切换检出结果/滤波后/边缘图三种视图，实时查看处理耗时。
         </p>
       </div>
 
