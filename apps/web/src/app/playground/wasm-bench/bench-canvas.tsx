@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
+import { initWasm, matmul as wasmMatmul, gaussian_filter as wasmGauss, dot_product as wasmDot, prime_sieve as wasmSieve, mandelbrot as wasmMandel, isWasmReady } from '@/lib/wasm-init'
 
 type BenchResult = {
   name: string
@@ -8,15 +9,16 @@ type BenchResult = {
   jsMedian: number
   jsMin: number
   jsMax: number
-  wasmPlaceholder: number | null
+  wasmMedian: number | null
+  wasmNote: string | null
   unit: string
 }
 
-const ITERATIONS = 5
-const N = 256
-const SORT_N = 200000
-const PRIME_N = 100000
-const CONV_IMG = 256
+const ITERATIONS = 15
+const N = 512
+const SORT_N = 500000
+const PRIME_N = 500000
+const CONV_IMG = 512
 
 function matmul256(): void {
   const a = new Float64Array(N * N)
@@ -109,21 +111,84 @@ function convolutionBench(): void {
   if (dst[0] < 0) console.log('unreachable')
 }
 
-const BENCHMARKS: { name: string; desc: string; fn: () => void; unit: string; wasmEst: number | null }[] = [
-  { name: '矩阵乘法', desc: `${N}x${N} double 矩阵乘法`, fn: matmul256, unit: 'ms', wasmEst: 15 },
-  { name: '图像卷积', desc: `Gaussian 5x5 on ${CONV_IMG}x${CONV_IMG}`, fn: convolutionBench, unit: 'ms', wasmEst: 3 },
-  { name: '归并排序', desc: `${(SORT_N / 1000).toFixed(0)}K 个 float 排序`, fn: sortBench, unit: 'ms', wasmEst: 40 },
-  { name: '质数筛', desc: `Eratosthenes 筛法 up to ${(PRIME_N / 1000).toFixed(0)}K`, fn: primeSieve, unit: 'ms', wasmEst: 1 },
-  { name: '向量点积', desc: '1M 个 double 点积', fn: dotProduct1M, unit: 'ms', wasmEst: 0.5 },
+function wasmMatmulBench(): void {
+  const a = new Float64Array(N * N); const b = new Float64Array(N * N)
+  for (let i = 0; i < N * N; i++) { a[i] = Math.random(); b[i] = Math.random() }
+  const c = wasmMatmul(N, a, b)
+  if (c.length === 0) console.log('unreachable')
+}
+
+function wasmGaussBench(): void {
+  const src = new Float64Array(CONV_IMG * CONV_IMG)
+  for (let i = 0; i < src.length; i++) src[i] = Math.random() * 255
+  const _result = wasmGauss(CONV_IMG, CONV_IMG, src, 5)
+  if (_result.length === 0) console.log('unreachable')
+}
+
+function wasmSieveBench(): void {
+  if (typeof wasmSieve !== 'function') { console.error('[bench] wasmSieve type:', typeof wasmSieve); return }
+  try {
+    const r = wasmSieve(PRIME_N)
+    if (!r || r.length === 0) console.warn('[bench] wasmSieve empty result, length:', r?.length)
+  } catch (e) {
+    console.error('[bench] wasmSieve error:', e)
+  }
+}
+
+function wasmDotBench(): void {
+  const a = new Float64Array(1000000); const b = new Float64Array(1000000)
+  for (let i = 0; i < 1000000; i++) { a[i] = Math.random(); b[i] = Math.random() }
+  const _result = wasmDot(a, b)
+  if (_result < 0) console.log('unreachable')
+}
+
+const MAND_W = 512; const MAND_H = 512; const MAND_ITER = 256
+
+function mandelbrotJS(): void {
+  const result = new Uint8Array(MAND_W * MAND_H)
+  for (let py = 0; py < MAND_H; py++) {
+    const y0 = (py / MAND_H) * 3.5 - 2.5
+    for (let px = 0; px < MAND_W; px++) {
+      const x0 = (px / MAND_W) * 3.5 - 2.5
+      let x = 0, y = 0, iter = 0
+      while (x * x + y * y <= 4 && iter < MAND_ITER) {
+        const xt = x * x - y * y + x0
+        y = 2 * x * y + y0
+        x = xt
+        iter++
+      }
+      result[py * MAND_W + px] = iter === MAND_ITER ? 0 : iter % 255
+    }
+  }
+  if (result[0] < 0) console.log('unreachable')
+}
+
+function wasmMandelBench(): void {
+  const r = wasmMandel(MAND_W, MAND_H, MAND_ITER)
+  if (r.length === 0) console.log('unreachable')
+}
+
+const BENCHMARKS: { name: string; desc: string; jsFn: () => void; wasmFn: (() => void) | null; wasmNote: string | null; unit: string }[] = [
+  { name: '矩阵乘法', desc: `${N}x${N} double 矩阵乘法`, jsFn: matmul256, wasmFn: wasmMatmulBench, wasmNote: null, unit: 'ms' },
+  { name: '图像卷积', desc: `Gaussian 5x5 on ${CONV_IMG}x${CONV_IMG}`, jsFn: convolutionBench, wasmFn: wasmGaussBench, wasmNote: null, unit: 'ms' },
+  { name: 'Mandelbrot', desc: `${MAND_W}x${MAND_H} 分形迭代 ${MAND_ITER} 次`, jsFn: mandelbrotJS, wasmFn: wasmMandelBench, wasmNote: null, unit: 'ms' },
+  { name: '归并排序', desc: `${(SORT_N / 1000).toFixed(0)}K 个 float 排序`, jsFn: sortBench, wasmFn: null, wasmNote: '内存拷贝开销 > 排序收益', unit: 'ms' },
+  { name: '质数筛', desc: `Eratosthenes 筛法 up to ${(PRIME_N / 1000).toFixed(0)}K`, jsFn: primeSieve, wasmFn: wasmSieveBench, wasmNote: null, unit: 'ms' },
+  { name: '向量点积', desc: '1M 个 double 点积', jsFn: dotProduct1M, wasmFn: wasmDotBench, wasmNote: null, unit: 'ms' },
 ]
 
-function runBench(fn: () => void, iterations: number): { median: number; min: number; max: number } {
+function runBench(fn: () => void, iterations: number): { median: number; min: number; max: number } | null {
   const times: number[] = []
-  for (let i = 0; i < iterations; i++) {
-    const t0 = performance.now()
-    fn()
-    const t1 = performance.now()
-    times.push(t1 - t0)
+  try {
+    for (let i = 0; i < iterations; i++) {
+      const t0 = performance.now()
+      fn()
+      const t1 = performance.now()
+      times.push(t1 - t0)
+    }
+  } catch (err) {
+    console.error('[bench] runBench error in iteration:', err)
+    return null
   }
   times.sort((a, b) => a - b)
   return {
@@ -137,7 +202,17 @@ export function BenchCanvas() {
   const [results, setResults] = useState<BenchResult[]>([])
   const [running, setRunning] = useState(false)
   const [currentBench, setCurrentBench] = useState('')
+  const [wasmReady, setWasmReady] = useState(false)
   const runningRef = useRef(false)
+
+  useEffect(() => {
+    initWasm()
+      .then(() => setWasmReady(true))
+      .catch(function (err) {
+        console.error('WASM init failed:', err)
+        setWasmReady(false)
+      })
+  }, [])
 
   const runAll = useCallback(async () => {
     if (runningRef.current) return
@@ -145,20 +220,31 @@ export function BenchCanvas() {
     setRunning(true)
     setResults([])
 
+    const wasmReady = isWasmReady()
+
     const allResults: BenchResult[] = []
 
     for (const bench of BENCHMARKS) {
-      setCurrentBench(bench.name)
+      setCurrentBench('JS: ' + bench.name)
       await new Promise(resolve => setTimeout(resolve, 50))
 
-      const t = runBench(bench.fn, ITERATIONS)
+      const jsTime = runBench(bench.jsFn, ITERATIONS)
+
+      let wasmTime: { median: number; min: number; max: number } | null = null
+      if (wasmReady && bench.wasmFn) {
+        setCurrentBench('WASM: ' + bench.name)
+        await new Promise(resolve => setTimeout(resolve, 10))
+        wasmTime = runBench(bench.wasmFn!, ITERATIONS)
+      }
+
       allResults.push({
         name: bench.name,
         desc: bench.desc,
-        jsMedian: t.median,
-        jsMin: t.min,
-        jsMax: t.max,
-        wasmPlaceholder: bench.wasmEst,
+        jsMedian: jsTime?.median ?? 0,
+        jsMin: jsTime?.min ?? 0,
+        jsMax: jsTime?.max ?? 0,
+        wasmMedian: wasmTime?.median ?? null,
+        wasmNote: bench.wasmNote,
         unit: bench.unit,
       })
       setResults([...allResults])
@@ -182,10 +268,10 @@ export function BenchCanvas() {
               ? 'border-[var(--border)] text-[var(--muted-foreground)] cursor-not-allowed'
               : 'border-[var(--accent)] bg-[var(--accent-muted)] text-[var(--accent-foreground)] hover:bg-[var(--accent)]/20')}
         >
-          {running ? (currentBench ? 'Running ' + currentBench + '...' : 'Running all...') : 'Run Benchmarks (' + ITERATIONS + ' iterations)'}
+          {running ? (currentBench ? currentBench + '...' : 'Running all...') : 'Run Benchmarks (' + ITERATIONS + ' iterations)'}
         </button>
         <span className="font-mono text-[9px] text-[var(--muted-foreground)]">
-          {results.length > 0 ? results.length + '/' + BENCHMARKS.length + ' complete' : 'Ready'}
+          {wasmReady ? 'WASM ready' : 'WASM loading...'} &middot; {results.length > 0 ? results.length + '/' + BENCHMARKS.length + ' complete' : 'Ready'}
         </span>
       </div>
 
@@ -197,14 +283,14 @@ export function BenchCanvas() {
                 <th className="text-left px-4 py-2 font-mono text-[10px] text-[var(--muted-foreground)]">Benchmark</th>
                 <th className="text-right px-4 py-2 font-mono text-[10px] text-[var(--muted-foreground)]">JS 中位数</th>
                 <th className="text-right px-4 py-2 font-mono text-[10px] text-[var(--muted-foreground)]">JS 范围</th>
-                <th className="text-right px-4 py-2 font-mono text-[10px] text-[var(--muted-foreground)]">WASM 预估</th>
-                <th className="text-right px-4 py-2 font-mono text-[10px] text-[var(--muted-foreground)]">预估加速比</th>
+                <th className="text-right px-4 py-2 font-mono text-[10px] text-[var(--muted-foreground)]">WASM</th>
+                <th className="text-right px-4 py-2 font-mono text-[10px] text-[var(--muted-foreground)]">加速比</th>
               </tr>
             </thead>
             <tbody>
               {results.map(function (r) {
                 const barWidth = Math.max(2, (r.jsMedian / maxJS) * 100)
-                const speedup = r.wasmPlaceholder ? (r.jsMedian / r.wasmPlaceholder).toFixed(1) : '—'
+                const speedup = r.wasmMedian !== null && r.wasmMedian > 0 ? (r.jsMedian / r.wasmMedian).toFixed(1) : '—'
                 return (
                   <tr key={r.name} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--muted)]/50">
                     <td className="px-4 py-2.5">
@@ -223,8 +309,12 @@ export function BenchCanvas() {
                       {r.jsMin.toFixed(1)}{r.unit} – {r.jsMax.toFixed(1)}{r.unit}
                     </td>
                     <td className="px-4 py-2.5 text-right">
-                      <span className="font-mono text-[10px] text-[var(--muted-foreground)]/60 tabular-nums">
-                        {r.wasmPlaceholder ? '~' + r.wasmPlaceholder + r.unit : '—'}
+                      <span className="font-mono text-[11px] tabular-nums text-[var(--accent)]">
+                        {r.wasmMedian !== null ? r.wasmMedian.toFixed(1) + r.unit : r.wasmNote ? (
+                          <span className="text-[9px] text-[var(--muted-foreground)]/50">{r.wasmNote}</span>
+                        ) : (
+                          <span className="text-[var(--muted-foreground)]/40">—</span>
+                        )}
                       </span>
                     </td>
                     <td className="px-4 py-2.5 text-right">

@@ -6,7 +6,8 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md,mdx,json}\"",
-    "type-check": "turbo type-check"
+    "type-check": "turbo type-check",
+    "build:wasm": "wasm-pack build --target web --out-dir apps/web/src/lib/wasm packages/wasm && rm -f apps/web/src/lib/wasm/.gitignore"
   },
   "devDependencies": {
     "prettier": "^3.4.2",

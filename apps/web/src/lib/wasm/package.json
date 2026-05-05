@@ -1,0 +1,15 @@
+{
+  "name": "pbeta-wasm",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "pbeta_wasm_bg.wasm",
+    "pbeta_wasm.js",
+    "pbeta_wasm.d.ts"
+  ],
+  "main": "pbeta_wasm.js",
+  "types": "pbeta_wasm.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

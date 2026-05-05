@@ -15,6 +15,10 @@ out
 # Turbo
 .turbo
 
+# Rust / WASM
+packages/wasm/target/
+packages/wasm/pkg/
+
 # Environment
 .env
 .env.local
