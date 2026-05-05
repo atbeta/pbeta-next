@@ -215,6 +215,34 @@ body::before {
   font-family: var(--font-mono);
 }
 
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  font-size: 0.85em;
+}
+.prose thead {
+  border-bottom: 2px solid var(--border-strong);
+}
+.prose th {
+  text-align: left;
+  padding: 0.5em 0.75em;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--foreground);
+}
+.prose td {
+  padding: 0.5em 0.75em;
+  border-bottom: 1px solid var(--border);
+}
+.prose tbody tr:last-child td {
+  border-bottom: none;
+}
+.prose tbody tr:hover {
+  background: var(--muted);
+}
+
 /* 滚动条美化 */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }

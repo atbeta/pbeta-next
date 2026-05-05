@@ -1,6 +1,7 @@
 import { defineCollection, defineConfig } from '@content-collections/core'
 import { compileMDX } from '@content-collections/mdx'
 import rehypePrettyCode from 'rehype-pretty-code'
+import remarkGfm from 'remark-gfm'
 import { z } from 'zod'
 
 const NOTE_STATUSES = ['architecture', 'development', 'research', 'snippet'] as const
@@ -9,6 +10,7 @@ const TERM_CATEGORIES = ['metrology', 'lithography', 'transistor', 'etching', 'd
 const TERM_DIFFICULTIES = ['beginner', 'intermediate', 'advanced'] as const
 
 const mdxOptions = {
+  remarkPlugins: [remarkGfm],
   rehypePlugins: [[rehypePrettyCode, { theme: 'github-dark' }]] as never,
 }
 
