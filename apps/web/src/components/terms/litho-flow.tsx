@@ -89,23 +89,23 @@ export function LithoFlow() {
     <div className="space-y-4">
       <div className="border border-[var(--border)] rounded-lg overflow-hidden bg-[var(--surface)]">
         <div className="px-4 py-2 border-b border-[var(--border)] bg-[var(--muted)] flex items-center justify-between">
-          <span className="font-mono text-[11px] font-semibold">{'光刻工艺流程 \u2014 ' + s.label}</span>
+          <span className="font-mono text-[11px] font-semibold">{'光刻工艺流程 — ' + s.label}</span>
           <span className="font-mono text-[9px] text-[var(--muted-foreground)]">
-            {'${step + 1} / ${STEPS.length} \u00b7 ${s.en}'}
+            {step + 1} / {STEPS.length} &middot; {s.en}
           </span>
         </div>
         <div className="p-4 pb-2">
-          <svg viewBox={'0 0 360 ${viewH}'} className="w-full max-w-[360px]">
-            {step >= 1 && (
+          <svg viewBox={'0 0 360 ' + viewH} className="w-full max-w-[360px]">
+            {step >= 0 && (
               <g>
                 <rect x={subX} y={subY - hmdsH} width={subW} height={hmdsH} rx={1} fill="#4a5568" opacity={0.6} />
               </g>
             )}
-            {step >= 2 && (
+            {step >= 1 && (
               <g>
                 <rect x={subX} y={subY - hmdsH - prH} width={subW} height={prH} rx={2}
-                  fill={step >= 7 ? '#6b7b8d' : '#c4884d'} opacity={0.85} />
-                {step >= 5 && step < 7 && (
+                  fill={step >= 6 ? '#6b7b8d' : '#c4884d'} opacity={0.85} />
+                {step >= 4 && step < 6 && (
                   <g>
                     {[55, 120, 190, 260, 315].map((cx) => (
                       <rect key={cx} x={cx} y={subY - hmdsH - prH} width={28} height={prH}
@@ -113,12 +113,12 @@ export function LithoFlow() {
                     ))}
                   </g>
                 )}
-                {step >= 7 && (
+                {step >= 6 && (
                   <g>
                     {[55, 120, 190, 260, 315].map((cx) => (
                       <rect key={cx} x={cx} y={subY - hmdsH - prH} width={28} height={prH} rx={1} fill="#c4884d" />
                     ))}
-                    {step === 7 && (
+                {step === 5 && (
                       <g>
                         {[55, 120, 190, 260, 315].map((cx) => (
                           <rect key={cx} x={cx - 1} y={subY - hmdsH - prH - 2} width={30} height={prH + 4} rx={1}
@@ -128,26 +128,26 @@ export function LithoFlow() {
                     )}
                   </g>
                 )}
-                {step >= 4 && step < 6 && (
+                {step >= 3 && step < 5 && (
                   <g>
                     <rect x={subX} y={subY - hmdsH - prH - 18} width={subW} height={8} rx={1}
                       fill="#555" opacity={0.5} />
                     {[55, 120, 190, 260, 315].map((cx) => (
                       <g key={cx}>
                         <line x1={cx + 14} y1={subY - hmdsH - prH - 22} x2={cx + 14} y2={subY - hmdsH - prH}
-                          stroke="#a78bfa" strokeWidth={1.2} opacity={step === 5 ? 0.8 : 0.5} />
-                        {step === 5 && (
+                          stroke="#a78bfa" strokeWidth={1.2} opacity={step === 4 ? 0.8 : 0.5} />
+                        {step === 4 && (
                           <circle cx={cx + 14} cy={subY - hmdsH - prH} r={2} fill="#a78bfa" opacity={0.5} />
                         )}
                       </g>
                     ))}
                   </g>
                 )}
-                {step === 3 && (
+                {step === 2 && (
                   <g>
                     {[50, 110, 170, 240, 310].map((cx) => (
                       <path key={cx}
-                        d={'M ${cx - 8} ${subY - hmdsH - prH - 6} Q ${cx} ${subY - hmdsH - prH - 14} ${cx + 8} ${subY - hmdsH - prH - 6}'}
+                        d={`M ${cx - 8} ${subY - hmdsH - prH - 6} Q ${cx} ${subY - hmdsH - prH - 14} ${cx + 8} ${subY - hmdsH - prH - 6}`}
                         stroke="#ff8c42" strokeWidth={1.2} fill="none" opacity={0.45} />
                     ))}
                   </g>
@@ -156,12 +156,12 @@ export function LithoFlow() {
                   <g>
                     {[55, 120, 190, 260, 315].map((cx) => (
                       <path key={cx}
-                        d={'M ${cx - 8} ${subY - hmdsH - prH - 4} Q ${cx} ${subY - hmdsH - prH - 12} ${cx + 8} ${subY - hmdsH - prH - 4}'}
+                        d={`M ${cx - 8} ${subY - hmdsH - prH - 4} Q ${cx} ${subY - hmdsH - prH - 12} ${cx + 8} ${subY - hmdsH - prH - 4}`}
                         stroke="#ff8c42" strokeWidth={1.2} fill="none" opacity={0.4} />
                     ))}
                   </g>
                 )}
-                {step === 2 && (
+                {step === 1 && (
                   <g>
                     <text x={subX + subW / 2} y={subY - hmdsH - prH - 14}
                       textAnchor="middle" fill="#c4884d" fontSize={9} fontFamily="monospace">PR</text>
@@ -173,11 +173,11 @@ export function LithoFlow() {
                 )}
               </g>
             )}
-            {(step === 0 || step === 1) && (
+            {step === 0 && (
               <g>
                 {[60, 110, 170, 240, 310].map((cx) => (
-                  <circle key={cx} cx={cx} cy={step === 0 ? subY - 8 : subY - hmdsH - 3}
-                    r={2.5} fill={step === 0 ? '#ff6b6b' : '#4a5568'} opacity={0.5} />
+                  <circle key={cx} cx={cx} cy={subY - 8}
+                    r={2.5} fill={'#ff6b6b'} opacity={0.5} />
                 ))}
               </g>
             )}
