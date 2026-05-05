@@ -5,6 +5,8 @@ import { MDXContent } from '@/components/mdx-content'
 import { CDVisualization } from '@/components/terms/cd-visualization'
 import { OverlayVisualization } from '@/components/terms/overlay-visualization'
 import { DefectGallery } from '@/components/terms/defect-gallery'
+import { FinFET3D } from '@/components/terms/finfet-3d'
+import { GAA3D } from '@/components/terms/gaa-3d'
 
 export async function generateStaticParams() {
   return allTerms.map((t) => ({ slug: t._meta.path }))
@@ -79,6 +81,16 @@ export default async function TermDetailPage({
       {term.visualization === 'defect-gallery' && (
         <div className="mb-10 anim-fade-up delay-1">
           <DefectGallery />
+        </div>
+      )}
+      {term.visualization === 'finfet-3d' && (
+        <div className="mb-10 anim-fade-up delay-1">
+          <FinFET3D />
+        </div>
+      )}
+      {term.visualization === 'gaa-3d' && (
+        <div className="mb-10 anim-fade-up delay-1">
+          <GAA3D />
         </div>
       )}
 
