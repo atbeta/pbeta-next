@@ -13,6 +13,9 @@ uniform float u_time;
 uniform vec4 u_mouse;
 `
 
+const FRAG_POST = `
+void main(){vec4 C;mainImage(C,gl_FragCoord.xy);gl_FragColor=C;}`
+
 const EXAMPLES: { name: string; code: string }[] = [
   {
     name: '渐变圆',
@@ -66,13 +69,14 @@ export function ShaderPlayground() {
       setError('Vertex shader error: ' + gl.getShaderInfoLog(vs)); gl.deleteShader(vs); return null
     }
     const fs = gl.createShader(gl.FRAGMENT_SHADER)!
-    const fullFs = FRAG_PRE + '\n' + code
+    const fullFs = FRAG_PRE + '\n' + code + '\n' + FRAG_POST
     gl.shaderSource(fs, fullFs); gl.compileShader(fs)
     if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) {
       const log = gl.getShaderInfoLog(fs) || ''
       const lines = fullFs.split('\n')
       const match = log.match(/ERROR: \d+:(\d+):/)
-      const lineNum = match ? parseInt(match[1]) - FRAG_PRE.split('\n').length : -1
+      const preLines = FRAG_PRE.split('\n').length
+      const lineNum = match ? parseInt(match[1]) - preLines : -1
       const ctx = lineNum > 0 && lineNum <= lines.length ? ' near: ' + lines[lineNum - 1].trim() : ''
       setError(log.replace(/\n/g, ' ').slice(0, 200) + ctx)
       gl.deleteShader(vs); gl.deleteShader(fs); return null
