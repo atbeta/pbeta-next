@@ -38,6 +38,22 @@ const playgrounds: PlaygroundEntry[] = [
     status: 'building',
   },
   {
+    href: '/playground/webgpu',
+    title: 'WebGPU Compute',
+    description: 'WebGPU Compute Shader 并行计算 8192 个粒子的引力模拟。WGSL 着色语言，GPU 通用计算的下一代 Web 标准。',
+    tags: ['WebGPU', 'Compute Shader', 'WGSL', 'GPGPU', '并行计算'],
+    category: '核心技术',
+    status: 'building',
+  },
+  {
+    href: '/playground/particles',
+    title: 'Canvas Physics Engine',
+    description: '纯 Canvas 2D 万级粒子物理引擎。引力/斥力/涡旋/拖尾四种模式，60fps 渲染优化，展示 2D 图形渲染底层功力。',
+    tags: ['Canvas 2D', '粒子系统', '物理引擎', '60fps', '渲染优化'],
+    category: '核心技术',
+    status: 'building',
+  },
+  {
     href: '/playground/diffraction',
     title: 'Diffraction Pattern Explorer',
     description: '夫琅禾费衍射图案实时生成：圆形/矩形孔径、光栅衍射、波长可调。光刻光学仿真的最小可行单元。',
