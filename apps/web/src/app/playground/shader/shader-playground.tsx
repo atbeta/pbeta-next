@@ -269,7 +269,7 @@ export function ShaderPlayground() {
             { label: 'GLSL ES 3.0 Spec (WebGL 2)', href: 'https://registry.khronos.org/OpenGL/specs/es/3.0/GLSL_ES_Specification_3.00.pdf' },
             { label: 'Kishimisu — Intro to Shaders', href: 'https://www.youtube.com/watch?v=f4s1h2YETNY' },
             { label: 'Inigo Quilez — Articles', href: 'https://iquilezles.org/articles/' },
-            { label: 'GLSL 内置函数速查', href: 'https://www.shaderific.com/glsl-functions' },
+            { label: 'GLSL 内置函数速查', href: 'https://webgl2fundamentals.org/webgl/lessons/webgl-shaders-and-glsl.html' },
           ].map((r) => (
             <a key={r.label} href={r.href} target="_blank" rel="noopener noreferrer"
               className="text-[var(--muted-foreground)] hover:text-[var(--accent)] transition-colors truncate">
