@@ -1,0 +1,180 @@
+'use client'
+
+import { useRef, useEffect, useState, useCallback } from 'react'
+
+const VERT = `attribute vec2 a_pos;
+varying vec2 v_uv;
+void main(){gl_Position=vec4(a_pos,0,1);v_uv=a_pos*0.5+0.5;}`
+
+const FRAG_PRE = `precision highp float;
+varying vec2 v_uv;
+uniform vec3 u_resolution;
+uniform float u_time;
+uniform vec4 u_mouse;
+`
+
+const EXAMPLES: { name: string; code: string }[] = [
+  {
+    name: '渐变圆',
+    code: `void mainImage(out vec4 C,vec2 U){vec2 uv=v_uv*2.-1.;float d=length(uv);C=mix(vec4(.2,.4,1,1),vec4(.05,.05,.15,1),smoothstep(.3,.5,d));}`,
+  },
+  {
+    name: '彩虹波',
+    code: `void mainImage(out vec4 C,vec2 U){vec2 uv=v_uv;float t=u_time*.5;C=vec4(.5+.5*cos(uv.x*6.+t),.5+.5*cos(uv.y*6.+t+2.),.5+.5*cos((uv.x+uv.y)*6.+t+4.),1);}`,
+  },
+  {
+    name: '棋格',
+    code: `void mainImage(out vec4 C,vec2 U){vec2 uv=v_uv*10.;vec2 c=step(.5,fract(uv));float v=c.x*c.y+(1.-c.x)*(1.-c.y);C=mix(vec4(.1,.1,.2,1),vec4(.9,.85,.7,1),v);}`,
+  },
+  {
+    name: '光线步进',
+    code: `float sdSphere(vec3 p,float r){return length(p)-r;}
+float map(vec3 p){return sdSphere(p,1.);}
+vec3 calcNormal(vec3 p){vec2 e=vec2(.001,0);return normalize(map(p)-vec3(map(p-e.xyy),map(p-e.yxy),map(p-e.yyx)));}
+void mainImage(out vec4 C,vec2 U){vec2 uv=v_uv*2.-1.;vec3 ro=vec3(0,0,-3);vec3 rd=normalize(vec3(uv,1));float t=0.;for(int i=0;i<80;i++){vec3 p=ro+rd*t;float d=map(p);if(d<.001)break;t+=d;}vec3 col=vec3(.05,.05,.1);if(t<20.){vec3 p=ro+rd*t;vec3 n=calcNormal(p);col=vec3(.2,.5,.8)*max(0.,dot(n,normalize(vec3(1,2,3))));}C=vec4(col,1);}`,
+  },
+  {
+    name: '鼠标追踪',
+    code: `void mainImage(out vec4 C,vec2 U){float d=length(v_uv-u_mouse.xy);float glow=.02/(d+.02);C=mix(vec4(.05,.05,.1,1),vec4(1,.4,.2,1),glow);}`,
+  },
+  {
+    name: '细胞噪声',
+    code: `vec2 random2(vec2 p){return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);}
+void mainImage(out vec4 C,vec2 U){vec2 uv=v_uv*5.;vec2 i=floor(uv);vec2 f=fract(uv);float m=.0;for(int y=-1;y<=1;y++)for(int x=-1;x<=1;x++){vec2 n=vec2(float(x),float(y));vec2 p=random2(i+n);p=.5+.5*sin(u_time+6.2831*p);m+=1.-smoothstep(.0,.6,length(n+p-f));}C=vec4(vec3(m*.25),1);}`,
+  },
+  {
+    name: '分形 Mandelbrot',
+    code: `void mainImage(out vec4 C,vec2 U){vec2 c=(v_uv*4.-vec2(2.5,2.));vec2 z=vec2(0);int n=0;for(int i=0;i<100;i++){if(dot(z,z)>4.)break;z=vec2(z.x*z.x-z.y*z.y,2.*z.x*z.y)+c;n++;}float t=float(n)/100.;C=vec4(vec3(t),1);}`,
+  },
+]
+
+export function ShaderPlayground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [code, setCode] = useState(EXAMPLES[0].code)
+  const [error, setError] = useState('')
+  const [activeExample, setActiveExample] = useState(0)
+  const mouseRef = useRef({ x: 0.5, y: 0.5, down: false })
+  const glRef = useRef<WebGLRenderingContext | null>(null)
+  const progRef = useRef<WebGLProgram | null>(null)
+  const startTime = useRef(performance.now())
+  const animRef = useRef(0)
+
+  const compile = useCallback((gl: WebGLRenderingContext) => {
+    const vs = gl.createShader(gl.VERTEX_SHADER)!
+    gl.shaderSource(vs, VERT); gl.compileShader(vs)
+    if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) {
+      setError('Vertex shader error: ' + gl.getShaderInfoLog(vs)); gl.deleteShader(vs); return null
+    }
+    const fs = gl.createShader(gl.FRAGMENT_SHADER)!
+    const fullFs = FRAG_PRE + '\n' + code
+    gl.shaderSource(fs, fullFs); gl.compileShader(fs)
+    if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) {
+      const log = gl.getShaderInfoLog(fs) || ''
+      const lines = fullFs.split('\n')
+      const match = log.match(/ERROR: \d+:(\d+):/)
+      const lineNum = match ? parseInt(match[1]) - FRAG_PRE.split('\n').length : -1
+      const ctx = lineNum > 0 && lineNum <= lines.length ? ' near: ' + lines[lineNum - 1].trim() : ''
+      setError(log.replace(/\n/g, ' ').slice(0, 200) + ctx)
+      gl.deleteShader(vs); gl.deleteShader(fs); return null
+    }
+    const prog = gl.createProgram()!
+    gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog)
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+      setError('Link error: ' + gl.getProgramInfoLog(prog)); gl.deleteProgram(prog); return null
+    }
+    setError('')
+    return prog
+  }, [code])
+
+  useEffect(() => {
+    const canvas = canvasRef.current; if (!canvas) return
+    const gl = canvas.getContext('webgl', { premultipliedAlpha: false, alpha: false })
+    if (!gl) { setError('WebGL not supported'); return }
+    glRef.current = gl
+
+    const buf = gl.createBuffer()!
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf)
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW)
+
+    function render() {
+      animRef.current = requestAnimationFrame(render)
+      const dpr = window.devicePixelRatio || 1
+      const w = canvas!.clientWidth * dpr
+      const h = canvas!.clientHeight * dpr
+      if (canvas!.width !== w || canvas!.height !== h) {
+        canvas!.width = w; canvas!.height = h; gl!.viewport(0, 0, w, h)
+      }
+      const prog = progRef.current
+      if (!prog) { gl!.clearColor(0.05, 0.05, 0.1, 1); gl!.clear(gl!.COLOR_BUFFER_BIT); return }
+      gl!.useProgram(prog)
+      const aPos = gl!.getAttribLocation(prog, 'a_pos')
+      gl!.enableVertexAttribArray(aPos)
+      gl!.bindBuffer(gl!.ARRAY_BUFFER, buf)
+      gl!.vertexAttribPointer(aPos, 2, gl!.FLOAT, false, 0, 0)
+      gl!.uniform3f(gl!.getUniformLocation(prog, 'u_resolution'), w, h, 1)
+      gl!.uniform1f(gl!.getUniformLocation(prog, 'u_time'), (performance.now() - startTime.current) / 1000)
+      gl!.uniform4f(gl!.getUniformLocation(prog, 'u_mouse'), mouseRef.current.x, 1 - mouseRef.current.y, mouseRef.current.down ? 1 : 0, 0)
+      gl!.drawArrays(gl!.TRIANGLE_STRIP, 0, 4)
+    }
+    render()
+
+    return () => { cancelAnimationFrame(animRef.current) }
+  }, [])
+
+  useEffect(() => {
+    const gl = glRef.current; if (!gl) return
+    const old = progRef.current
+    const prog = compile(gl)
+    progRef.current = prog
+    if (old) gl.deleteProgram(old)
+  }, [compile])
+
+  const handleMouse = useCallback((e: React.MouseEvent) => {
+    const rect = canvasRef.current?.getBoundingClientRect(); if (!rect) return
+    mouseRef.current = { x: (e.clientX - rect.left) / rect.width, y: (e.clientY - rect.top) / rect.height, down: e.buttons > 0 }
+  }, [])
+
+  const selectExample = (idx: number) => {
+    setActiveExample(idx)
+    setCode(EXAMPLES[idx].code)
+    setError('')
+  }
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-2 anim-fade-up delay-1">
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-1.5">
+          {EXAMPLES.map(function (ex, i) {
+            const active = i === activeExample
+            return (
+              <button key={i} onClick={function () { selectExample(i) }}
+                className={'px-2 py-1 font-mono text-[10px] rounded border transition-colors ' +
+                  (active ? 'border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]' : 'border-[var(--border)] text-[var(--muted-foreground)] hover:border-[var(--border-strong)]')}>
+                {ex.name}
+              </button>
+            )
+          })}
+        </div>
+        <div>
+          <textarea
+            value={code}
+            onChange={function (e) { setCode(e.target.value); setActiveExample(-1) }}
+            className="w-full h-[340px] p-3 font-mono text-[11px] bg-[var(--surface)] border border-[var(--border)] rounded-lg text-[var(--foreground)] resize-none focus:outline-none focus:border-[var(--accent)] transition-colors"
+            spellCheck={false}
+          />
+          {error && (
+            <div className="mt-2 p-2 border border-red-500/20 rounded bg-red-500/5 text-[10px] font-mono text-red-400 break-all">
+              {error}
+            </div>
+          )}
+        </div>
+      </div>
+      <div>
+        <div className="border border-[var(--border)] rounded-lg overflow-hidden bg-[var(--surface)] aspect-square">
+          <canvas ref={canvasRef} onMouseMove={handleMouse} onMouseDown={handleMouse} onMouseUp={handleMouse}
+            className="w-full h-full cursor-crosshair" />
+        </div>
+      </div>
+    </div>
+  )
+}

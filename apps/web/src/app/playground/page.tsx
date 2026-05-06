@@ -30,6 +30,14 @@ const playgrounds: PlaygroundEntry[] = [
     status: 'building',
   },
   {
+    href: '/playground/shader',
+    title: 'Shader Playground',
+    description: '在线编写 GLSL Fragment Shader，实时 WebGL 预览。鼠标位置/时间传入 uniform，支持 Shadertoy 风格创作。',
+    tags: ['WebGL', 'GLSL', 'Shader', '实时渲染'],
+    category: '核心技术',
+    status: 'building',
+  },
+  {
     href: '/playground/diffraction',
     title: 'Diffraction Pattern Explorer',
     description: '夫琅禾费衍射图案实时生成：圆形/矩形孔径、光栅衍射、波长可调。光刻光学仿真的最小可行单元。',
@@ -47,7 +55,7 @@ const playgrounds: PlaygroundEntry[] = [
   },
 ]
 
-const categories = ['量检测', '光学仿真', '基础设施']
+const categories = ['核心技术', '量检测', '光学仿真', '基础设施']
 
 const statusMap: Record<string, { dot: string; label: string }> = {
   building: { dot: 'bg-yellow-500 animate-pulse', label: '构建中' },
