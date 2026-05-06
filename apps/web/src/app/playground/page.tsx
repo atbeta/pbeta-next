@@ -95,6 +95,36 @@ export default function PlaygroundPage() {
         </p>
       </div>
 
+      <div className="mb-10 p-4 border border-[var(--border)] rounded-lg bg-[var(--surface)] anim-fade-up delay-1">
+        <h3 className="font-mono text-xs font-semibold mb-3">Canvas 2D / WebGL / WebGPU — 怎么选？</h3>
+        <div className="grid gap-4 sm:grid-cols-3 text-[10px] leading-relaxed">
+          <div>
+            <h4 className="font-mono text-[var(--accent)] mb-1">Canvas 2D</h4>
+            <p className="text-[var(--muted-foreground)] mb-2">CPU 渲染，逐个像素/形状绘制。适合图表、UI 动画、简单粒子系统（~1 万粒子）。</p>
+            <p className="text-[var(--muted-foreground)]/70 font-mono text-[9px]">
+              代表库：Chart.js · Fabric.js · Konva.js · PixiJS (2D WebGL)
+            </p>
+          </div>
+          <div>
+            <h4 className="font-mono text-[var(--accent)] mb-1">WebGL / WebGL 2</h4>
+            <p className="text-[var(--muted-foreground)] mb-2">GPU 渲染，Shader 编程。3D 场景、图像处理、粒子系统（百万级）。GLSL 着色语言。</p>
+            <p className="text-[var(--muted-foreground)]/70 font-mono text-[9px]">
+              代表库：<strong>Three.js</strong> · Babylon.js · PIXI.js · Deck.gl · regl
+            </p>
+          </div>
+          <div>
+            <h4 className="font-mono text-[var(--accent)] mb-1">WebGPU</h4>
+            <p className="text-[var(--muted-foreground)] mb-2">下一代 GPU API，Compute Shader 做通用并行计算。性能上限最高，浏览器支持有限（Chrome 113+）。WGSL 着色语言。</p>
+            <p className="text-[var(--muted-foreground)]/70 font-mono text-[9px]">
+              代表库：wgpu-matrix · three.js (experimental) · webgpu-samples
+            </p>
+          </div>
+        </div>
+        <div className="mt-3 pt-3 border-t border-[var(--border)] text-[10px] text-[var(--muted-foreground)] leading-relaxed">
+          <span className="font-mono text-[var(--accent)]">Three.js</span> 是目前 Web 3D 的事实标准——封装的场景图、材质、光照、模型加载。学 Web 3D 从 Three.js 入手是最快的，但要深入理解 GPU 管线离不开原生 Shader 编程（本页的 Shader Playground 就是练这个的）。
+        </div>
+      </div>
+
       {categories.map((category, ci) => {
         const items = playgrounds.filter((p) => p.category === category)
         if (items.length === 0) return null
