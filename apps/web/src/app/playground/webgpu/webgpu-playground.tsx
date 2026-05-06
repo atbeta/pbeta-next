@@ -9,56 +9,60 @@ const COMPUTE_SHADER = `@group(0) @binding(0) var<storage, read_write> particles
 fn main(@builtin(global_invocation_id) gid: vec3<u32>) {
     let i = gid.x;
     if (i >= arrayLength(&particles)) { return; }
-    let p = particles[i];
+    var p = particles[i];
     let pos = p.xy;
     let vel = p.zw;
 
-    // gravity toward center + mouse attraction
+    let mouse = vec2<f32>(params.y, params.z);
     let center = vec2<f32>(0.0, 0.0);
-    let to_center = center - pos;
-    let dist = length(to_center) + 0.01;
-    let force = to_center / (dist * dist) * params.x * 0.0001;
+    let toCenter = center - pos;
+    let dCenter = length(toCenter) + 0.01;
+    var force = toCenter / (dCenter * dCenter) * params.x;
 
-    // mouse position from params.yz
-    let mouse = vec2<f32>(params.y * 2.0 - 1.0, (1.0 - params.z) * 2.0 - 1.0);
-    let to_mouse = mouse - pos;
-    let mdist = length(to_mouse) + 0.05;
-    let mforce = to_mouse / (mdist * mdist) * params.w * 0.001;
+    let toMouse = mouse - pos;
+    let dMouse = length(toMouse) + 0.01;
+    force += toMouse / (dMouse * dMouse) * params.w;
 
-    var new_vel = vel + force + mforce;
-    // damping
-    new_vel = new_vel * 0.995;
-    var new_pos = pos + new_vel;
+    var newVel = vel + force * 0.00005;
+    let speed = length(newVel);
+    if (speed > 0.015) { newVel = newVel / speed * 0.015; }
 
-    // boundary bounce
-    if (new_pos.x < -1.0 || new_pos.x > 1.0) { new_vel.x = -new_vel.x * 0.8; new_pos.x = clamp(new_pos.x, -1.0, 1.0); }
-    if (new_pos.y < -1.0 || new_pos.y > 1.0) { new_vel.y = -new_vel.y * 0.8; new_pos.y = clamp(new_pos.y, -1.0, 1.0); }
+    var newPos = pos + newVel;
 
-    particles[i] = vec4<f32>(new_pos, new_vel);
+    if (newPos.x < -1.0 || newPos.x > 1.0) { newVel.x *= -0.5; newPos.x = clamp(newPos.x, -1.0, 1.0); }
+    if (newPos.y < -1.0 || newPos.y > 1.0) { newVel.y *= -0.5; newPos.y = clamp(newPos.y, -1.0, 1.0); }
+
+    newVel *= 0.999;
+
+    particles[i] = vec4<f32>(newPos, newVel);
 }
 `
 
 const VERTEX_SHADER = `
-struct VertexOutput {
+struct Out {
     @builtin(position) pos: vec4<f32>,
-    @location(0) color: vec4<f32>,
+    @location(0) color: vec3<f32>,
+    @location(1) @interpolate(flat) pointSize: f32,
 }
+
 @vertex
-fn vs(@location(0) pos: vec2<f32>, @location(1) vel: vec2<f32>) -> VertexOutput {
-    var out: VertexOutput;
-    out.pos = vec4<f32>(pos, 0.0, 1.0);
-    let speed = length(vel);
-    out.color = vec4<f32>(0.3 + speed * 50.0 * 0.7, 0.5, 1.0 - speed * 0.5, 1.0);
+fn vs(@location(0) p: vec2<f32>, @location(1) v: vec2<f32>) -> Out {
+    var out: Out;
+    out.pos = vec4<f32>(p, 0.0, 1.0);
+    let s = length(v) * 80.0 + 3.0;
+    out.pointSize = s;
+    let hue = atan2(v.y, v.x) / 6.283 + 0.5;
+    out.color = vec3<f32>(0.5 + 0.5 * cos(hue * 6.283 + 0.0), 0.5 + 0.5 * cos(hue * 6.283 + 2.0), 0.5 + 0.5 * cos(hue * 6.283 + 4.0));
     return out;
 }
+
 @fragment
-fn fs(@location(0) color: vec4<f32>) -> @location(0) vec4<f32> {
-    return color;
+fn fs(@location(0) color: vec3<f32>) -> @location(0) vec4<f32> {
+    return vec4<f32>(color * 1.5, 1.0);
 }
 `
 
-const PARTICLE_COUNT = 8192
-const WORKGROUP_SIZE = 64
+const PARTICLE_COUNT = 4096
 
 export function WebGPUPlayground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -84,57 +88,57 @@ export function WebGPUPlayground() {
       const particles = new Float32Array(PARTICLE_COUNT * 4)
       for (let i = 0; i < PARTICLE_COUNT; i++) {
         const angle = Math.random() * Math.PI * 2
-        const radius = Math.sqrt(Math.random()) * 0.3
+        const radius = Math.sqrt(Math.random()) * 0.2
         particles[i * 4] = Math.cos(angle) * radius
         particles[i * 4 + 1] = Math.sin(angle) * radius
-        particles[i * 4 + 2] = (Math.random() - 0.5) * 0.005
-        particles[i * 4 + 3] = (Math.random() - 0.5) * 0.005
+        particles[i * 4 + 2] = (Math.random() - 0.5) * 0.003
+        particles[i * 4 + 3] = (Math.random() - 0.5) * 0.003
       }
 
-      const particleBuf = device.createBuffer({
+      const buf = device.createBuffer({
         size: particles.byteLength,
         usage: GPUBufferUsage.STORAGE | GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
         mappedAtCreation: true,
       })
-      new Float32Array(particleBuf.getMappedRange()).set(particles)
-      particleBuf.unmap()
+      new Float32Array(buf.getMappedRange()).set(particles)
+      buf.unmap()
 
       const paramBuf = device.createBuffer({
         size: 16,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
       })
 
-      const computeModule = device.createShaderModule({ code: COMPUTE_SHADER })
-      const vertexModule = device.createShaderModule({ code: VERTEX_SHADER })
+      const computeMod = device.createShaderModule({ code: COMPUTE_SHADER })
+      const vertMod = device.createShaderModule({ code: VERTEX_SHADER })
 
-      const bindGroupLayout = device.createBindGroupLayout({
+      const bgLayout = device.createBindGroupLayout({
         entries: [
           { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } },
           { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } },
         ],
       })
 
-      const pipelineLayout = device.createPipelineLayout({ bindGroupLayouts: [bindGroupLayout] })
+      const pipeLayout = device.createPipelineLayout({ bindGroupLayouts: [bgLayout] })
 
-      const computePipeline = device.createComputePipeline({
-        layout: pipelineLayout,
-        compute: { module: computeModule, entryPoint: 'main' },
+      const computePipe = device.createComputePipeline({
+        layout: pipeLayout,
+        compute: { module: computeMod, entryPoint: 'main' },
       })
 
-      const renderPipeline = device.createRenderPipeline({
-        layout: 'auto',
-        vertex: { module: vertexModule, entryPoint: 'vs', buffers: [{ arrayStride: 16, attributes: [
+      const renderPipe = device.createRenderPipeline({
+        layout: device.createPipelineLayout({ bindGroupLayouts: [] }),
+        vertex: { module: vertMod, entryPoint: 'vs', buffers: [{ arrayStride: 16, stepMode: 'vertex', attributes: [
           { shaderLocation: 0, offset: 0, format: 'float32x2' },
           { shaderLocation: 1, offset: 8, format: 'float32x2' },
         ]}] },
-        fragment: { module: vertexModule, entryPoint: 'fs', targets: [{ format }] },
+        fragment: { module: vertMod, entryPoint: 'fs', targets: [{ format, blend: { color: { srcFactor: 'src-alpha', dstFactor: 'one', operation: 'add' }, alpha: { srcFactor: 'one', dstFactor: 'one', operation: 'add' } } }] },
         primitive: { topology: 'point-list' },
       })
 
       const bindGroup = device.createBindGroup({
-        layout: bindGroupLayout,
+        layout: bgLayout,
         entries: [
-          { binding: 0, resource: { buffer: particleBuf } },
+          { binding: 0, resource: { buffer: buf } },
           { binding: 1, resource: { buffer: paramBuf } },
         ],
       })
@@ -145,25 +149,33 @@ export function WebGPUPlayground() {
       function render() {
         animRef.current = requestAnimationFrame(render)
 
-        paramData[0] = 0.5  // gravity strength
-        paramData[1] = mouseRef.current.x
-        paramData[2] = mouseRef.current.y
-        paramData[3] = mouseRef.current.down ? 2.0 : -0.5  // mouse force
+        const mx = mouseRef.current.x * 2 - 1
+        const my = (1 - mouseRef.current.y) * 2 - 1
+        paramData[0] = 0.15
+        paramData[1] = mx
+        paramData[2] = my
+        paramData[3] = mouseRef.current.down ? 15.0 : -0.5
         device.queue.writeBuffer(paramBuf, 0, paramData)
 
         const encoder = device.createCommandEncoder()
+
         const computePass = encoder.beginComputePass()
-        computePass.setPipeline(computePipeline)
+        computePass.setPipeline(computePipe)
         computePass.setBindGroup(0, bindGroup)
-        computePass.dispatchWorkgroups(Math.ceil(PARTICLE_COUNT / WORKGROUP_SIZE))
+        computePass.dispatchWorkgroups(Math.ceil(PARTICLE_COUNT / 64))
         computePass.end()
 
-        const textureView = ctx.getCurrentTexture().createView()
+        const tex = ctx.getCurrentTexture().createView()
         const renderPass = encoder.beginRenderPass({
-          colorAttachments: [{ view: textureView, clearValue: { r: 0.05, g: 0.05, b: 0.1, a: 1 }, loadOp: 'clear', storeOp: 'store' }],
+          colorAttachments: [{
+            view: tex,
+            clearValue: { r: 0.02, g: 0.02, b: 0.06, a: 1 },
+            loadOp: 'clear',
+            storeOp: 'store',
+          }],
         })
-        renderPass.setPipeline(renderPipeline)
-        renderPass.setVertexBuffer(0, particleBuf)
+        renderPass.setPipeline(renderPipe)
+        renderPass.setVertexBuffer(0, buf)
         renderPass.draw(PARTICLE_COUNT)
         renderPass.end()
 
@@ -172,7 +184,7 @@ export function WebGPUPlayground() {
         const now = performance.now()
         lastFps.current.frames++
         if (now - lastFps.current.time > 1000) {
-          setFps(lastFps.current.frames)
+          setFps(prev => Math.round((prev + lastFps.current.frames) / 2))
           lastFps.current = { time: now, frames: 0 }
         }
       }
@@ -180,7 +192,6 @@ export function WebGPUPlayground() {
     }
 
     init()
-
     return () => { cancelAnimationFrame(animRef.current) }
   }, [])
 
@@ -193,7 +204,7 @@ export function WebGPUPlayground() {
     return (
       <div className="border-2 border-dashed border-[var(--border)] rounded-xl p-12 text-center anim-fade-up delay-1">
         <span className="font-mono text-[11px] text-[var(--muted-foreground)]">
-          WebGPU not available in this browser. Try Chrome 113+, Edge 113+, or enable <code>chrome://flags/#enable-unsafe-webgpu</code>.
+          WebGPU not available. Try Chrome 113+, Edge 113+.
         </span>
       </div>
     )
@@ -209,15 +220,16 @@ export function WebGPUPlayground() {
       <div className="border border-[var(--border)] rounded-lg overflow-hidden bg-[var(--surface)]">
         <div className="px-4 py-2 border-b border-[var(--border)] bg-[var(--muted)] flex items-center justify-between">
           <span className="font-mono text-[11px] font-semibold">WebGPU Compute — {PARTICLE_COUNT.toLocaleString()} Particles</span>
-          <span className="font-mono text-[9px] text-[var(--muted-foreground)]">{fps} fps &middot; click to attract</span>
+          <span className="font-mono text-[9px] text-[var(--muted-foreground)]">~{fps}fps &middot; click + drag to attract</span>
         </div>
-        <canvas ref={canvasRef} onMouseMove={handleMouse} onMouseDown={handleMouse} onMouseUp={handleMouse}
-          className="w-full aspect-video cursor-crosshair" width={1024} height={576} />
+        <canvas ref={canvasRef} onMouseMove={handleMouse} onMouseDown={handleMouse} onMouseUp={handleMouse} onMouseLeave={function(e) { mouseRef.current = {...mouseRef.current, down: false}; handleMouse(e) }}
+          className="w-full" style={{ height: 420, aspectRatio: '16/9' }} width={1280} height={720} />
       </div>
       <div className="p-3 border border-dashed border-[var(--border)] rounded-lg text-[10px] text-[var(--muted-foreground)] leading-relaxed">
-        <span className="font-mono text-[var(--accent)]">Compute Shader</span> 在 GPU 上并行更新 {PARTICLE_COUNT.toLocaleString()} 个粒子的位置和速度（每个粒子独立计算）&middot;
-        <span className="font-mono text-[var(--accent)]">点击/拖动</span> 产生引力吸引粒子 &middot;
-        <span className="font-mono text-[var(--accent)]">WGSL</span> 是 WebGPU 的着色语言，语法接近 Rust。
+        <span className="font-mono text-[var(--accent)]">Compute Shader (WGSL)</span> 在 GPU 上并行更新每个粒子的位置 &middot;
+        <span className="font-mono text-[var(--accent)]">粒子大小随速度变化</span>（快→大，慢→小）&middot;
+        <span className="font-mono text-[var(--accent)]">点击/拖动鼠标</span> 产生引力吸引粒子飞向你 &middot;
+        速度限制 0.015 防止飞散。
       </div>
     </div>
   )
