@@ -12,7 +12,7 @@ const links = [
   { href: '/research', label: '研究' },
   { href: '/services', label: '服务' },
   { href: '/terms', label: '术语' },
-  { href: '/playground', label: 'Playground' },
+  { href: '/playground', label: '演练场' },
 ]
 
 export function Nav() {

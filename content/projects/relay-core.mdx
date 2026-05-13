@@ -1,18 +1,45 @@
 ---
-title: "RelayCore — 高性能代理内核（开发中）"
-description: "纯 Rust 编写的代理内核项目，作为 RelayCraft 后续版本的核心能力储备，目前仍处于内部开发阶段。"
-date: "2026-03-17"
-tags: ["RelayCore", "Proxy Engine", "Gateway", "Rust", "Performance"]
+title: "RelayCore — 高性能 Rust 流量拦截引擎"
+description: "纯 Rust 编写的 HTTP/HTTPS 代理引擎，支持 MITM、WebSocket 拦截、规则引擎与 Deno 脚本运行时。已发布 v0.1.2，作为 RelayCraft 的核心代理层。"
+date: "2026-05-07"
+tags: ["Rust", "MITM Proxy", "WebSocket", "MCP", "Tauri", "crates.io"]
 projectStatus: active
+repo: "https://github.com/relaycraft/relay-core"
 ---
 
-`RelayCore` 是一个纯 Rust 编写的代理内核项目，目标是为 `RelayCraft` 提供更可控、更高性能的底层数据处理能力。当前该项目尚未公开到 GitHub，仍在内部持续迭代。
+RelayCore 是一个高性能 Rust 流量拦截引擎，定位为 mitmproxy 的现代替代方案。目前已发布 v0.1.2，托管在 [relaycraft/relay-core](https://github.com/relaycraft/relay-core)。
 
-## 架构优势
+## 核心功能
 
-- **性能优先**：以 Rust 异步 I/O 为基础，面向高并发代理场景优化。
-- **安全与稳定**：利用 Rust 的类型系统与所有权模型降低运行时风险。
-- **模块化设计**：按协议处理、过滤器与流量管线拆分，便于后续扩展。
-- **面向 RelayCraft 集成**：作为长期演进方向，为上层产品沉淀核心能力。
+- **HTTP/HTTPS MITM 代理** — 动态 TLS 证书生成
+- **WebSocket 拦截** — 消息级检查、修改与重放
+- **规则引擎** — 匹配 + 动作流水线（headers、body、status、redirect、mock、ratelimit）
+- **Deno 脚本运行时** — 动态修改请求/响应/WebSocket
+- **拦截断点** — 暂停实时流量、检查、修改后放行或丢弃
+- **透明代理** — Linux TPROXY (TCP+UDP)，macOS PF (TCP)
+- **流量脱敏** — 可配置的敏感字段遮蔽
+- **审计追踪** — 控制面变更记录与持久化
+- **Prometheus 指标** — 结构化指标快照
 
-当前页面用于记录项目定位与阶段进展，公开仓库与独立发布计划将在后续版本中补充。
+## 架构
+
+```
+Adapters (CLI, HTTP API, MCP, Tauri)
+        │
+relay-core-runtime (state hub, lifecycle, event bus)
+        │
+relay-core-lib (capture, proxy, MITM, TLS, rule engine)
+        │
+relay-core-api / relay-core-script / relay-core-storage
+```
+
+## 公开发布的 Crates
+
+| Crate | 用途 | crates.io |
+|-------|------|-----------|
+| `relay-core-runtime` | 主 API，状态编排与代理生命周期 | 已发布 |
+| `relay-core-http` | REST + SSE 适配器，供 Web UI 与外部工具集成 | 已发布 |
+| `relay-core-probe` | MCP 适配器，供 AI Agent 使用 | Beta |
+| `relay-core-cli` | 独立 CLI + TUI 二进制 | Beta |
+
+当前版本 v0.1.2，MIT 开源。

@@ -1,0 +1,46 @@
+---
+title: "CodeSense — Vue 代码知识图谱"
+description: "面向 AI 代理的 Vue/Electron 代码知识图谱引擎。tree-sitter AST 解析 + LadybugDB 图数据库 + MCP 协议 + Sigma.js 可视化。已发布 v0.2.2。"
+date: "2026-05-07"
+tags: ["MCP", "Vue", "AST", "Knowledge Graph", "tree-sitter", "CLI", "npm"]
+projectStatus: active
+repo: "https://github.com/atbeta/code-sense"
+---
+
+CodeSense 是面向 Vue 项目的配置驱动代码知识图谱引擎。将 `.vue` 组件、store、路由等实体构建为图节点，识别 import、API 调用、路由映射等关系，为 AI 编码助手提供结构化的代码上下文。
+
+灵感来自 GitNexus，并针对 Vue 语义做了增强。通过 `npx @code-sense/core` 即可运行。MIT 开源。
+
+## 核心能力
+
+- 将 `.vue` 组件、store、路由等实体构建为**图节点**
+- 将 import、store 调用、路由映射等关系构建为**图边**
+- 识别 **Vue API 调用**（如 `ref`、`computed`、`watch`）
+- 提供 **MCP 工具** 支持影响分析、调用追踪、语义检索
+- 提供 **浏览器图谱视图**（Sigma.js WebGL 渲染）用于交互探索
+
+## MCP 工具集（10 个）
+
+| 工具 | 用途 |
+|------|------|
+| `entity_context` | 获取文件/实体的完整上下文 |
+| `function_context` | 查看函数调用方、被调用方与同级函数 |
+| `impact_analysis` | 分析改动影响范围 |
+| `diff_impact` | 基于 Git diff 的影响追踪 |
+| `route_map` | 路由与组件映射 |
+| `trace_usage` | 符号使用位置与证据 |
+| `find_entrypoints` | 识别入口点（路由、页面等） |
+| `semantic_search` | 语义检索函数/代码片段 |
+| `project_overview` | 项目图谱统计总览 |
+| `cypher` | 执行原生 Cypher 调试查询 |
+
+## 快速开始
+
+```bash
+npx @code-sense/core init --interactive  # 初始化配置
+npx @code-sense/core index               # 建立知识图谱索引
+npx @code-sense/core view                # 浏览图谱可视化
+npx @code-sense/core serve               # 作为 MCP 服务接入 AI 编码助手
+```
+
+当前版本 v0.2.2，npm 发布为 `@code-sense/core`。
