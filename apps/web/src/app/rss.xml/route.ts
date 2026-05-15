@@ -10,7 +10,7 @@ export async function GET() {
   <channel>
     <title>Tech Memos</title>
     <link>${siteUrl}</link>
-    <description>技术备忘录 (Tech Memos) — 记录项目、研究与技术笔记的个人空间。</description>
+    <description>Beta 的公开技术笔记 — 十多年软件开发经验，记录项目实践、Web 3D 可视化与技术思考。</description>
     <language>zh-cn</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <atom:link href="${siteUrl}/rss.xml" rel="self" type="application/rss+xml" />

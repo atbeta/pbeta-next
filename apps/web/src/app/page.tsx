@@ -71,7 +71,7 @@ export default function Home() {
   const recentProjects = allProjects
     .filter((p) => p.projectStatus === 'active')
     .sort((a, b) => (a.date < b.date ? 1 : -1))
-    .slice(0, 3)
+    .slice(0, 4)
 
   return (
     <div className="relative mx-auto max-w-4xl px-6 pb-24 pt-10 space-y-24">
@@ -94,8 +94,8 @@ export default function Home() {
         </h1>
         
         <p className="text-[var(--muted-foreground)] text-lg leading-relaxed max-w-2xl">
-          我是 Beta，一名软件开发工程师。这里是我的个人工作台与公开笔记，<br className="hidden sm:block" />
-          我会在这里持续记录正在做的项目、一些技术随想，以及对工具、前端工程和开发体验的观察。
+          我是 Beta，十多年软件开发经验。关注前端工程、开发者工具和 Web 3D 可视化——<br className="hidden sm:block" />
+          这里持续记录正在做的项目、技术思考和观察。
         </p>
 
         <div className="mt-8 flex items-center gap-4">

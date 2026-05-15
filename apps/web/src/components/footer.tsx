@@ -29,6 +29,7 @@ export function Footer() {
           <div className="flex flex-col gap-2">
             <span className="text-[10px] font-mono text-[var(--muted-foreground)] uppercase tracking-wider mb-1">站点</span>
             <a href="/rss.xml" className="text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">RSS 订阅</a>
+            <Link href="/about" className="text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">关于</Link>
             <Link href="/login" className="text-[10px] text-[var(--muted-foreground)]/40 hover:text-[var(--foreground)] transition-colors mt-auto">管理入口</Link>
           </div>
         </div>

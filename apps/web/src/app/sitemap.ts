@@ -10,6 +10,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${siteUrl}/notes`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
     { url: `${siteUrl}/research`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${siteUrl}/services`, lastModified: new Date(), changeFrequency: 'hourly', priority: 0.6 },
+    { url: `${siteUrl}/about`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
+    { url: `${siteUrl}/terms`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
+    { url: `${siteUrl}/playground`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
   ]
 
   const noteRoutes: MetadataRoute.Sitemap = allNotes.map((note) => ({

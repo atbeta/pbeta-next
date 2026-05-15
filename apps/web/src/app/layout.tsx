@@ -11,7 +11,7 @@ const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin']
 
 export const metadata: Metadata = {
   title: { default: 'Tech Memos · 技术备忘录', template: '%s · Tech Memos' },
-  description: '技术备忘录 (Tech Memos) — 记录项目、研究与技术笔记的个人空间。',
+  description: 'Beta 的公开技术笔记 — 十多年软件开发经验，记录项目实践、Web 3D 可视化与技术思考。',
   metadataBase: new URL('https://pbeta.me'),
   alternates: {
     canonical: '/',
